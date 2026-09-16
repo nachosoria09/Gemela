@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es-UY">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de uso · Inventario y Contabilidad — Joyería</title>
+<style>
+  :root{
+    --crema:#FBF7F1; --marfil:#F3EAE0; --borde:#E1D3C0;
+    --tinta:#2A211C; --tinta-suave:#7A6C60;
+    --vino:#6E2438; --vino-oscuro:#4E1826; --oro:#A9822F;
+    --alerta:#A23B2E;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:var(--sans); background:var(--crema); color:var(--tinta); line-height:1.55;}
+  header.top{background:var(--vino); color:#fdf9f3; padding:16px; position:sticky; top:0; z-index:10; border-bottom:3px solid var(--oro);}
+  header.top .wrap{max-width:720px; margin:0 auto;}
+  header.top h1{font-family:var(--serif); font-size:1.1rem; margin:0; color:#fff;}
+  .volver{display:inline-block; margin-top:6px; color:#f3d9a4; font-size:.85rem; text-decoration:none; font-weight:600;}
+  .volver:hover{text-decoration:underline;}
+  main{max-width:720px; margin:0 auto; padding:20px 18px 60px;}
+  h2{font-family:var(--serif); color:var(--vino); font-size:1.15rem; border-bottom:1px solid var(--borde); padding-bottom:6px; margin-top:30px;}
+  h3{font-family:var(--serif); color:var(--tinta); font-size:1rem; margin-top:18px;}
+  code{background:var(--marfil); padding:1px 5px; border-radius:3px; font-family:var(--mono); font-size:.85em;}
+  .intro{background:#fff; border:1px solid var(--borde); border-radius:6px; padding:12px 14px; font-size:.93rem;}
+  .aviso{background:#fbeee7; border:1px solid var(--alerta); border-radius:4px; padding:10px 12px; font-size:.85rem; margin-top:14px;}
+  .volver-abajo{display:block; text-align:center; margin-top:34px; font-weight:600; color:var(--vino);}
+  ul,ol{padding-left:1.2em;}
+  li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <h1>Manual de uso — Inventario y Contabilidad (Joyería)</h1>
+    <a class="volver" href="index.html">← Volver a la app</a>
+  </div>
+</header>
+<main>
+
+<p class="intro">Esta app te ayuda a llevar el inventario de tus productos, tus materiales, el packaging, tus compras/inversiones y tus ventas — y te arma un resumen financiero mensual y anual automáticamente. Es una primera versión pensada para probar y ajustar: si algo te resulta confuso o falta un campo, avisá.</p>
+
+<h2>¿Dónde se guardan mis datos?</h2>
+<p><strong>En este mismo dispositivo, adentro de este mismo navegador.</strong> No hace falta crear ninguna cuenta, ni una planilla, ni nada de Google.</p>
+<p class="aviso">⚠️ Si cargás datos desde el celular y después abrís la app en la computadora, vas a ver dos cosas distintas — no son el mismo lugar. Cada dispositivo (y cada navegador) guarda su propia copia.</p>
+<p>Por eso conviene elegir un solo dispositivo principal para cargar todo, y usar la copia de seguridad si necesitás pasar los datos a otro lado.</p>
+
+<h2>Copia de seguridad (muy importante)</h2>
+<p>Desde el botón <strong>⋮</strong> (arriba a la derecha) → <strong>Más opciones</strong>:</p>
+<ul>
+  <li><strong>⬇ Exportar copia de seguridad:</strong> descarga un archivo con todo lo cargado. Guardalo en Google Drive, WhatsApp a vos misma, etc.</li>
+  <li><strong>⬆ Restaurar copia:</strong> si cambiás de dispositivo o perdés los datos, elegís ese archivo y todo vuelve a aparecer. <strong>Ojo:</strong> reemplaza todo lo que tengas cargado en ese momento.</li>
+</ul>
+<p>Recomendación: hacé una copia una vez por semana, o después de cargar muchos datos de una sola vez.</p>
+
+<h2>Inventario de productos</h2>
+<p>Acá van tus piezas para la venta: aros, collares, pulseras, pañuelos, cintos, bandoleras, esclavas, conjuntos, o cualquier categoría que definas.</p>
+<ul>
+  <li><strong>+ Agregar producto:</strong> para una pieza con código nuevo. Completás código, categoría, nombre, material, color, proveedor, costo, precio de venta, cantidad, ubicación, recompra, calidad y observaciones.</li>
+  <li><strong>+ Sumar stock:</strong> para cuando comprás más unidades de una pieza que ya existe (recompra al mismo código). Solo cargás cuánto agregaste y si cambió el costo/precio.</li>
+  <li>Si intentás dar de alta un código repetido, la app te avisa y te pide usar "+ Sumar stock".</li>
+  <li>Cuando el stock disponible llega a 0, la pieza se muestra como <strong>"Vendida / sin stock"</strong>, pero sigue en tu historial.</li>
+  <li>Al cargar un producto nuevo, por defecto se genera también un registro automático en Compras / Inversiones (se puede desmarcar).</li>
+</ul>
+<h3>Categorías</h3>
+<p>Se agregan o quitan desde <strong>⋮ → Más opciones → Categorías de productos</strong>. Vienen algunas de referencia, totalmente editables.</p>
+
+<h2>Inventario de materiales</h2>
+<p>Cosas que comprás para el funcionamiento del emprendimiento, pero que no se venden (ej: aro de luz, cartulinas de fondo). Se registra nombre, cantidad, costo total (el unitario se calcula solo) y proveedor.</p>
+
+<h2>Packaging</h2>
+<ul>
+  <li>Cargás el <strong>costo total</strong> de la compra y la <strong>cantidad comprada</strong> — el costo por unidad se calcula solo.</li>
+  <li>Si comprás más del mismo packaging después, usá <strong>+ Sumar stock</strong>: la app promedia el costo unitario entre lo que ya tenías y lo nuevo.</li>
+  <li>Al usarlo en una venta, el stock disponible se descuenta solo.</li>
+</ul>
+
+<h2>Compras / Inversiones</h2>
+<p>El registro general de todo lo que gastaste: fecha, proveedor, concepto, monto, envío, si ya lo recibiste, y el costo total invertido.</p>
+<ul>
+  <li>La mayoría se generan solos al cargar un producto, material o packaging (se marcan "Automática").</li>
+  <li>También podés agregar una compra manual (por ejemplo, un gasto suelto que no es inventario).</li>
+  <li><strong>Importante:</strong> editar o borrar un registro automático desde acá no cambia el producto/material/packaging relacionado — son independientes una vez creados.</li>
+</ul>
+
+<h2>Ventas</h2>
+<h3>Generar venta</h3>
+<ol>
+  <li>Nombre de la clienta (obligatorio), y si querés, cédula, teléfono y ciudad/dirección.</li>
+  <li><strong>+ Agregar producto:</strong> elegís de la lista con stock disponible y la cantidad. Podés agregar varios.</li>
+  <li><strong>+ Agregar packaging:</strong> igual que los productos.</li>
+  <li>Medio de pago y si el pago ya fue recibido.</li>
+  <li>Canal de entrega: Personal (en mano) o Envío (pide empresa y n° de seguimiento).</li>
+  <li>El costo total y el monto de venta se calculan solos, en tiempo real.</li>
+  <li><strong>Confirmar venta:</strong> guarda la venta y descuenta el stock automáticamente.</li>
+</ol>
+<h3>Historial de ventas</h3>
+<p>Lista todas las ventas, con filtro por mes. Al eliminar una venta, el stock de productos y packaging usados se repone automáticamente.</p>
+<p><em>(Por ahora no se puede editar una venta ya guardada — si hay un error, eliminala y volvela a cargar; es seguro, porque el stock se repone solo.)</em></p>
+
+<h2>Resumen financiero</h2>
+<ul>
+  <li><strong>Este mes:</strong> total invertido, total vendido, packaging usado, ganancia neta, pedidos, productos vendidos y en stock — todo calculado automáticamente.</li>
+  <li><strong>A tu criterio:</strong> "Reinvertido", "Ganancia utilizable" y observaciones. Estos campos los completás vos, porque depende de tu decisión.</li>
+  <li><strong>Balance anual:</strong> elegís el año y ves la suma de todos los meses.</li>
+</ul>
+
+<h2>Si varias personas van a usar esta app</h2>
+<p>Como cada dispositivo guarda sus propios datos por separado, si más de una persona la usa, cada una debería usar su propio dispositivo — esta versión no sincroniza datos en tiempo real entre dispositivos.</p>
+
+<h2>Privacidad</h2>
+<p>Tus datos nunca salen de tu dispositivo. No se mandan a ningún servidor, ni nube, ni a Anthropic (Claude) ni a nadie. La única forma en que "salen" es si vos misma exportás la copia de seguridad y la compartís.</p>
+
+<h2>Cosas para revisar en esta primera prueba</h2>
+<ul>
+  <li>Los registros automáticos en Compras/Inversiones no se sincronizan si después editás el producto original.</li>
+  <li>El packaging descuenta stock igual que los productos al usarse en una venta.</li>
+  <li>Los materiales no descuentan stock al "usarse" — quedan solo como registro de compra.</li>
+  <li>No hay, por ahora, edición de una venta ya guardada (solo eliminar y volver a cargar).</li>
+</ul>
+
+<a class="volver-abajo" href="index.html">← Volver a la app</a>
+
+</main>
+</body>
+</html>
