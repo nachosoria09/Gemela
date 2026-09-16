@@ -51,7 +51,9 @@ El empaquetado que usás para entregar tus ventas (bolsas, cajas, etc.).
 
 ## Compras / Inversiones
 
-Es el registro general de todo lo que gastaste en el emprendimiento: fecha, proveedor, concepto, monto, envío (agencia y costo), si ya lo recibiste, y el costo total invertido.
+Es el registro general de todo lo que gastaste en el emprendimiento: fecha, proveedor, concepto, monto, envío (agencia y costo), si ya lo recibiste, el costo total invertido, y el **origen de los fondos**.
+
+- **Origen de los fondos**: en cada compra elegís si salió de tu **capital propio (inversión inicial, de tu bolsillo)** o de una **reinversión (con plata que ya generó el emprendimiento)**. Esto se pide en cada lugar donde se genera una compra (producto, material, packaging o compra manual), y después se ve desglosado en el Resumen financiero.
 
 - La mayoría de estos registros **se generan solos** cuando cargás un producto, un material o un packaging nuevo (se marcan como "Automática").
 - También podés agregar una compra manual para gastos que no son ni producto, ni material, ni packaging (por ejemplo, un gasto de envío suelto).
@@ -77,9 +79,10 @@ Lista todas las ventas hechas, con filtro por mes. Podés eliminar una venta —
 
 ## Resumen financiero
 
-- **Este mes**: total invertido, total vendido, packaging usado, ganancia neta, cantidad de pedidos y de productos vendidos, y productos en stock hoy — todo calculado automáticamente a partir de tus compras y ventas cargadas.
-- **A tu criterio**: "Reinvertido", "Ganancia utilizable" y observaciones del mes. Estos tres campos **los completás vos**, porque depende de tu decisión cuánto reinvertís en stock nuevo y cuánto retirás — la app no lo puede calcular sola.
-- **Balance anual**: elegís el año y ves la suma de todos los meses (tanto lo calculado automático como lo que hayas cargado a mano).
+- **Este mes**: total invertido, total vendido, invertido de tu capital propio, **reinvertido** (toda compra que hayas marcado como pagada con dinero del emprendimiento), packaging usado, ganancia neta, cantidad de pedidos y de productos vendidos, y productos en stock hoy — todo calculado automáticamente a partir de tus compras y ventas cargadas.
+- **Ganancia embolsable**: se calcula sola, como un porcentaje de la ganancia neta del mes (por defecto 25%, editable si tu criterio cambia). Con los botones **"Sí, la retiré" / "No, quedó en el emprendimiento"** marcás si efectivamente sacaste esa plata o la dejaste en el negocio.
+- **Notas del mes**: un espacio libre para observaciones.
+- **Balance anual**: elegís el año y ves la suma de todos los meses — incluida la ganancia embolsable total, cuánta ya retiraste y cuánta todavía no.
 
 ## Si varias personas van a usar esta app
 

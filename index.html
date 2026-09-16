@@ -324,14 +324,24 @@
     <div class="resumen-grid" id="resumenMesGrid"></div>
 
     <fieldset>
-      <legend>A tu criterio</legend>
-      <label class="first">Reinvertido este mes</label>
-      <input type="number" id="resumenReinvertido" oninput="guardarResumenManual()">
-      <label>Ganancia utilizable (lo que retirás)</label>
-      <input type="number" id="resumenGananciaUtilizable" oninput="guardarResumenManual()">
-      <label>Observaciones del mes</label>
+      <legend>Ganancia embolsable</legend>
+      <label class="first">Porcentaje que te retirás de la ganancia neta</label>
+      <input type="number" id="resumenPorcentajeGU" min="0" max="100" oninput="guardarPorcentajeGananciaUtilizable(this.value)">
+      <p class="ayuda">Se aplica a todos los meses. Cambialo acá si tu criterio cambia más adelante.</p>
+      <div class="resumen-grid" style="margin-top:8px;">
+        <div class="resumen-caja destacado"><div class="etiqueta">Ganancia embolsable (este mes)</div><div class="valor" id="resumenGananciaUtilizableCalc">$0</div></div>
+      </div>
+      <div class="pill-select" id="pillRetiro" style="margin-top:8px;">
+        <label id="pillRetiroSi" onclick="setRetiroGanancia(true)"><span>Sí, la retiré</span></label>
+        <label id="pillRetiroNo" onclick="setRetiroGanancia(false)"><span>No, quedó en el emprendimiento</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Notas del mes</legend>
+      <label class="first">Observaciones</label>
       <textarea id="resumenObservaciones" rows="2" oninput="guardarResumenManual()"></textarea>
-      <p class="ayuda">Estos tres campos los completás vos — la app no los calcula sola, porque depende de tu criterio (por ejemplo, cuánto reinvertís en stock nuevo).</p>
+      <p class="ayuda">Estos campos los completás vos — la app no los calcula sola, porque depende de tu criterio (por ejemplo, cuánto reinvertís en stock nuevo).</p>
     </fieldset>
 
     <hr class="separador">
@@ -546,6 +556,24 @@ function confirmar(mensaje, onConfirm){
    ========================================================================= */
 const CATEGORIAS_DEFECTO = ['Aros','Collares','Pulseras','Anillos','Cadenas','Pañuelos','Cintos','Bandoleras','Esclavas','Conjuntos','Otro'];
 
+const ORIGENES_FONDOS = ['Capital propio (inversión inicial)', 'Reinversión (ganancias del emprendimiento)'];
+function selectOrigenFondosHTML(idSelect, valorActual){
+  return `<label>Origen de los fondos</label>
+    <select id="${idSelect}">
+      ${ORIGENES_FONDOS.map(o=>`<option value="${esc(o)}" ${valorActual===o?'selected':''}>${esc(o)}</option>`).join('')}
+    </select>`;
+}
+async function obtenerPorcentajeGananciaUtilizable(){
+  const reg = await storeGet('config','porcentajeGananciaUtilizable');
+  if(reg && typeof reg.valor === 'number') return reg.valor;
+  await storePut('config', {clave:'porcentajeGananciaUtilizable', valor:25});
+  return 25;
+}
+async function guardarPorcentajeGananciaUtilizable(valor){
+  await storePut('config', {clave:'porcentajeGananciaUtilizable', valor: Number(valor)||0});
+  renderResumen();
+}
+
 async function obtenerCategorias(){
   const reg = await storeGet('config','categorias');
   if(reg && Array.isArray(reg.valor) && reg.valor.length) return reg.valor;
@@ -704,6 +732,7 @@ async function abrirFormProducto(idExistente){
           <div><label>Agencia de envío (opcional)</label><input type="text" id="fpAgenciaEnvio"></div>
           <div><label>Monto de envío</label><input type="number" id="fpMontoEnvio" value="0"></div>
         </div>
+        ${selectOrigenFondosHTML('fpOrigenFondos')}
         <div class="check-linea">
           <input type="checkbox" id="fpRecibido" checked>
           <label for="fpRecibido">Ya lo recibiste</label>
@@ -773,6 +802,7 @@ async function guardarProducto(idExistente){
       montoEnvio,
       recibido: document.getElementById('fpRecibido').checked ? 'Sí' : 'No',
       costoTotal: monto+montoEnvio,
+      origenFondos: document.getElementById('fpOrigenFondos').value,
       origen: 'producto', origenId: datos.id, automatica: true
     });
   }
@@ -800,6 +830,7 @@ async function abrirSumarStockProducto(id){
       <input type="text" id="ssProveedor" value="${esc(p.proveedor||'')}">
       <label>Fecha</label>
       <input type="date" id="ssFecha" value="${hoyISO()}">
+      ${selectOrigenFondosHTML('ssOrigenFondos', 'Reinversión (ganancias del emprendimiento)')}
     </fieldset>
     <div class="form-actions">
       <button class="btn btn-secundario" onclick="cerrarModal()">Cancelar</button>
@@ -825,7 +856,8 @@ async function guardarSumaStockProducto(id){
       id: uid(), fecha: document.getElementById('ssFecha').value || hoyISO(),
       proveedor: document.getElementById('ssProveedor').value.trim(),
       concepto: 'Producto (recompra): '+p.nombre, monto, agenciaEnvio:'', montoEnvio:0,
-      recibido:'Sí', costoTotal: monto, origen:'producto', origenId:p.id, automatica:true
+      recibido:'Sí', costoTotal: monto, origenFondos: document.getElementById('ssOrigenFondos').value,
+      origen:'producto', origenId:p.id, automatica:true
     });
   }
   cerrarModal(); renderProductos(); toast('Stock actualizado');
@@ -878,6 +910,7 @@ async function abrirFormMaterial(idExistente){
     <textarea id="fmObservaciones" rows="2">${esc(m?.observaciones||'')}</textarea>
     ${idExistente?'':`
     <div class="check-linea"><input type="checkbox" id="fmGenerarCompra" checked><label for="fmGenerarCompra">Generar registro en Compras / Inversiones</label></div>
+    ${selectOrigenFondosHTML('fmOrigenFondos')}
     `}
     <div class="form-actions">
       <button class="btn btn-secundario" onclick="cerrarModal()">Cancelar</button>
@@ -902,7 +935,8 @@ async function guardarMaterial(idExistente){
     await storePut('compras', {
       id: uid(), fecha: datos.fecha, proveedor: datos.proveedor,
       concepto: 'Material: '+nombre, monto: costoTotal, agenciaEnvio:'', montoEnvio:0,
-      recibido:'Sí', costoTotal, origen:'material', origenId:datos.id, automatica:true
+      recibido:'Sí', costoTotal, origenFondos: document.getElementById('fmOrigenFondos').value,
+      origen:'material', origenId:datos.id, automatica:true
     });
   }
   cerrarModal(); renderMateriales(); toast(idExistente?'Material actualizado':'Material agregado');
@@ -945,6 +979,7 @@ async function abrirFormPackaging(){
     <label>Fecha</label><input type="date" id="fkFecha" value="${hoyISO()}">
     <label>Proveedor</label><input type="text" id="fkProveedor">
     <div class="check-linea"><input type="checkbox" id="fkGenerarCompra" checked><label for="fkGenerarCompra">Generar registro en Compras / Inversiones</label></div>
+    ${selectOrigenFondosHTML('fkOrigenFondos')}
     <div class="form-actions">
       <button class="btn btn-secundario" onclick="cerrarModal()">Cancelar</button>
       <button class="btn" onclick="guardarPackaging()">Guardar</button>
@@ -970,7 +1005,9 @@ async function guardarPackaging(){
     const proveedor = document.getElementById('fkProveedor').value.trim();
     await storePut('compras', {
       id: uid(), fecha, proveedor, concepto:'Packaging: '+nombre, monto: costoTotal,
-      agenciaEnvio:'', montoEnvio:0, recibido:'Sí', costoTotal, origen:'packaging', origenId:datos.id, automatica:true
+      agenciaEnvio:'', montoEnvio:0, recibido:'Sí', costoTotal,
+      origenFondos: document.getElementById('fkOrigenFondos').value,
+      origen:'packaging', origenId:datos.id, automatica:true
     });
   }
   cerrarModal(); renderPackaging(); toast('Packaging agregado');
@@ -985,6 +1022,7 @@ async function abrirSumarStockPackaging(id){
     <div class="check-linea"><input type="checkbox" id="skGenerarCompra" checked><label for="skGenerarCompra">Generar registro en Compras / Inversiones</label></div>
     <label>Proveedor</label><input type="text" id="skProveedor">
     <label>Fecha</label><input type="date" id="skFecha" value="${hoyISO()}">
+    ${selectOrigenFondosHTML('skOrigenFondos', 'Reinversión (ganancias del emprendimiento)')}
     <div class="form-actions">
       <button class="btn btn-secundario" onclick="cerrarModal()">Cancelar</button>
       <button class="btn" onclick="guardarSumaStockPackaging('${id}')">Guardar</button>
@@ -1006,7 +1044,8 @@ async function guardarSumaStockPackaging(id){
       id: uid(), fecha: document.getElementById('skFecha').value || hoyISO(),
       proveedor: document.getElementById('skProveedor').value.trim(),
       concepto: 'Packaging (reposición): '+pk.nombre, monto: costoTotal, agenciaEnvio:'', montoEnvio:0,
-      recibido:'Sí', costoTotal, origen:'packaging', origenId:pk.id, automatica:true
+      recibido:'Sí', costoTotal, origenFondos: document.getElementById('skOrigenFondos').value,
+      origen:'packaging', origenId:pk.id, automatica:true
     });
   }
   cerrarModal(); renderPackaging(); toast('Stock de packaging actualizado');
@@ -1031,6 +1070,7 @@ async function renderCompras(){
         <div><div class="nombre">${esc(c.concepto)}</div><div class="sub">${esc(c.proveedor||'—')} · ${fmtFecha(c.fecha)}</div></div>
         <span class="badge ${c.automatica?'oro':''}">${c.automatica?'Automática':'Manual'}</span>
       </div>
+      <div class="linea"><span>Origen de los fondos</span><span>${c.origenFondos ? esc(c.origenFondos.startsWith('Capital')?'Capital propio':'Reinversión') : '—'}</span></div>
       <div class="linea"><span>Monto</span><span>${money(c.monto)}</span></div>
       ${c.montoEnvio?`<div class="linea"><span>Envío (${esc(c.agenciaEnvio||'—')})</span><span>${money(c.montoEnvio)}</span></div>`:''}
       <div class="linea"><span>Costo total invertido</span><span>${money(c.costoTotal)}</span></div>
@@ -1057,6 +1097,7 @@ function abrirFormCompra(){
       <div><label>Monto de envío ($)</label><input type="number" id="fcMontoEnvio" value="0"></div>
     </div>
     <label>Agencia de envío (opcional)</label><input type="text" id="fcAgenciaEnvio">
+    ${selectOrigenFondosHTML('fcOrigenFondos')}
     <div class="check-linea"><input type="checkbox" id="fcRecibido" checked><label for="fcRecibido">Ya lo recibiste</label></div>
     <div class="form-actions">
       <button class="btn btn-secundario" onclick="cerrarModal()">Cancelar</button>
@@ -1074,7 +1115,8 @@ async function guardarCompraManual(){
     proveedor: document.getElementById('fcProveedor').value.trim(), concepto, monto,
     agenciaEnvio: document.getElementById('fcAgenciaEnvio').value.trim(), montoEnvio,
     recibido: document.getElementById('fcRecibido').checked?'Sí':'No',
-    costoTotal: monto+montoEnvio, origen:'manual', automatica:false
+    costoTotal: monto+montoEnvio, origenFondos: document.getElementById('fcOrigenFondos').value,
+    origen:'manual', automatica:false
   });
   cerrarModal(); renderCompras(); toast('Compra registrada');
 }
@@ -1296,13 +1338,17 @@ async function calcularResumenMes(mesISO){
   const comprasMes = compras.filter(c=>(c.fecha||'').startsWith(mesISO));
   const ventasMes = ventas.filter(v=>(v.fecha||'').startsWith(mesISO));
   const totalInvertido = comprasMes.reduce((s,c)=>s+(c.costoTotal||0),0);
+  const invertidoCapitalPropio = comprasMes.filter(c=>(c.origenFondos||'').startsWith('Capital')).reduce((s,c)=>s+(c.costoTotal||0),0);
+  const invertidoReinversion = comprasMes.filter(c=>(c.origenFondos||'').startsWith('Reinversión')).reduce((s,c)=>s+(c.costoTotal||0),0);
+  const invertidoSinEspecificar = totalInvertido - invertidoCapitalPropio - invertidoReinversion;
   const totalVendido = ventasMes.reduce((s,v)=>s+(v.montoTotal||0),0);
   const costoProductosVendidos = ventasMes.reduce((s,v)=>s+v.items.reduce((s2,i)=>s2+i.costoUnitario*i.cantidad,0),0);
   const packagingUsado = ventasMes.reduce((s,v)=>s+v.packagingItems.reduce((s2,i)=>s2+i.costoUnitario*i.cantidad,0),0);
   const gananciaNeta = totalVendido - costoProductosVendidos - packagingUsado;
   const cantidadPedidos = ventasMes.length;
   const cantidadVendidos = ventasMes.reduce((s,v)=>s+v.items.reduce((s2,i)=>s2+i.cantidad,0),0);
-  return { totalInvertido, totalVendido, packagingUsado, gananciaNeta, cantidadPedidos, cantidadVendidos };
+  return { totalInvertido, invertidoCapitalPropio, invertidoReinversion, invertidoSinEspecificar,
+    totalVendido, packagingUsado, gananciaNeta, cantidadPedidos, cantidadVendidos };
 }
 async function renderResumen(){
   const inputMes = document.getElementById('mesResumen');
@@ -1315,6 +1361,8 @@ async function renderResumen(){
   document.getElementById('resumenMesGrid').innerHTML = `
     <div class="resumen-caja"><div class="etiqueta">Total invertido</div><div class="valor">${money(r.totalInvertido)}</div></div>
     <div class="resumen-caja"><div class="etiqueta">Total vendido</div><div class="valor">${money(r.totalVendido)}</div></div>
+    <div class="resumen-caja"><div class="etiqueta">Invertido — capital propio</div><div class="valor">${money(r.invertidoCapitalPropio)}</div></div>
+    <div class="resumen-caja"><div class="etiqueta">Reinvertido (con dinero del emprendimiento)</div><div class="valor">${money(r.invertidoReinversion)}</div></div>
     <div class="resumen-caja"><div class="etiqueta">Packaging usado</div><div class="valor">${money(r.packagingUsado)}</div></div>
     <div class="resumen-caja destacado"><div class="etiqueta">Ganancia neta</div><div class="valor">${money(r.gananciaNeta)}</div></div>
     <div class="resumen-caja"><div class="etiqueta">Pedidos</div><div class="valor">${r.cantidadPedidos}</div></div>
@@ -1322,10 +1370,14 @@ async function renderResumen(){
     <div class="resumen-caja" style="grid-column:1 / -1;"><div class="etiqueta">Productos en stock hoy</div><div class="valor">${enStock}</div></div>
   `;
 
+  const porcentaje = await obtenerPorcentajeGananciaUtilizable();
+  document.getElementById('resumenPorcentajeGU').value = porcentaje;
+  const gananciaUtilizable = r.gananciaNeta * (porcentaje/100);
+  document.getElementById('resumenGananciaUtilizableCalc').textContent = money(gananciaUtilizable);
+
   const manual = await storeGet('resumenManual', mesISO);
-  document.getElementById('resumenReinvertido').value = manual?.reinvertido ?? '';
-  document.getElementById('resumenGananciaUtilizable').value = manual?.gananciaUtilizable ?? '';
   document.getElementById('resumenObservaciones').value = manual?.observaciones ?? '';
+  pintarPillRetiro(manual?.retirado);
 
   const anioSel = document.getElementById('anioResumen');
   const anioActual = new Date().getFullYear();
@@ -1337,31 +1389,50 @@ async function renderResumen(){
   }
   renderResumenAnual();
 }
-async function guardarResumenManual(){
+function pintarPillRetiro(retirado){
+  document.getElementById('pillRetiroSi').classList.toggle('activo', retirado===true);
+  document.getElementById('pillRetiroNo').classList.toggle('activo', retirado===false || retirado===undefined);
+}
+async function setRetiroGanancia(retirado){
+  pintarPillRetiro(retirado);
+  await guardarResumenManual(retirado);
+}
+async function guardarResumenManual(retiradoParam){
   const mesISO = document.getElementById('mesResumen').value || mesActualISO();
+  let retirado = retiradoParam;
+  if(retirado===undefined){
+    const previo = await storeGet('resumenManual', mesISO);
+    retirado = previo?.retirado ?? false;
+  }
   await storePut('resumenManual', {
     mesAno: mesISO,
-    reinvertido: Number(document.getElementById('resumenReinvertido').value)||0,
-    gananciaUtilizable: Number(document.getElementById('resumenGananciaUtilizable').value)||0,
+    retirado,
     observaciones: document.getElementById('resumenObservaciones').value
   });
 }
 async function renderResumenAnual(){
   const anio = document.getElementById('anioResumen').value;
-  let totalInvertido=0, totalVendido=0, gananciaNeta=0, reinvertido=0, gananciaUtilizable=0;
+  const porcentaje = await obtenerPorcentajeGananciaUtilizable();
+  let totalInvertido=0, totalVendido=0, gananciaNeta=0, reinvertido=0;
+  let gananciaUtilizableTotal=0, gananciaUtilizableRetirada=0, gananciaUtilizableNoRetirada=0;
   for(let m=1;m<=12;m++){
     const mesISO = anio + '-' + String(m).padStart(2,'0');
     const r = await calcularResumenMes(mesISO);
     totalInvertido += r.totalInvertido; totalVendido += r.totalVendido; gananciaNeta += r.gananciaNeta;
+    reinvertido += r.invertidoReinversion;
+    const gu = r.gananciaNeta * (porcentaje/100);
+    gananciaUtilizableTotal += gu;
     const manual = await storeGet('resumenManual', mesISO);
-    if(manual){ reinvertido += manual.reinvertido||0; gananciaUtilizable += manual.gananciaUtilizable||0; }
+    if(manual?.retirado) gananciaUtilizableRetirada += gu; else gananciaUtilizableNoRetirada += gu;
   }
   document.getElementById('resumenAnioGrid').innerHTML = `
     <div class="resumen-caja"><div class="etiqueta">Total invertido</div><div class="valor">${money(totalInvertido)}</div></div>
     <div class="resumen-caja"><div class="etiqueta">Total vendido</div><div class="valor">${money(totalVendido)}</div></div>
     <div class="resumen-caja destacado"><div class="etiqueta">Ganancia neta</div><div class="valor">${money(gananciaNeta)}</div></div>
     <div class="resumen-caja"><div class="etiqueta">Reinvertido</div><div class="valor">${money(reinvertido)}</div></div>
-    <div class="resumen-caja" style="grid-column:1/-1;"><div class="etiqueta">Ganancia utilizable</div><div class="valor">${money(gananciaUtilizable)}</div></div>
+    <div class="resumen-caja"><div class="etiqueta">Ganancia embolsable (${porcentaje}%)</div><div class="valor">${money(gananciaUtilizableTotal)}</div></div>
+    <div class="resumen-caja"><div class="etiqueta">Ya retirada</div><div class="valor">${money(gananciaUtilizableRetirada)}</div></div>
+    <div class="resumen-caja" style="grid-column:1/-1;"><div class="etiqueta">Todavía sin retirar</div><div class="valor">${money(gananciaUtilizableNoRetirada)}</div></div>
   `;
 }
 
