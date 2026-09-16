@@ -6,7 +6,7 @@ Los datos se guardan **en el propio dispositivo/navegador de quien la usa** (Ind
 
 ## Usar la app
 
-👉 **[Abrir la app](https://TUUSUARIO.github.io/NOMBRE-DEL-REPO/)** — reemplazá el link una vez publicada (ver guía abajo).
+👉 **[Abrir la app](https://nachosoria09.github.io/Gemela/)** — reemplazá el link una vez publicada (ver guía abajo).
 
 Antes de usarla por primera vez, seguí el manual:
 
